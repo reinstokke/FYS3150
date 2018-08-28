@@ -14,11 +14,11 @@ def read_result_and_plot(filename):
     file.close()
 
     plt.figure()
-    plt.plot(x,u, label=r"$u(x)$")
+    # plt.plot(x,u, label=r"$u(x)$")
     plt.plot(x,v, label=r"$v(x)$, $n={}$".format(len(x)-2))
     plt.xlabel(r"$x$")
     plt.legend()
-    # plt.savefig("plot1.png")
+    plt.savefig("./figs/v_x.png")
     plt.show()
 
 
@@ -37,13 +37,15 @@ def read_error_and_plot(filename):
     plt.ylabel(r"$\epsilon $")
     plt.legend()
     plt.grid()
+    plt.savefig("./figs/eps_h.png")
 
     import numpy as np
     best_h = log_h[ np.argmin(log_eps) ]
-    msg = "\nThe optimal value for log(h) is {} based on available data.\n".format((best_h))
+    msg = "The optimal value for log(h) is {} based on available data.".format((best_h))
     print msg
 
     plt.show()
+
 
 def main():
     """ Example runs:
@@ -62,7 +64,6 @@ def main():
             read_result_and_plot(filename)
         elif sys.argv[2] == '1':
             read_error_and_plot(filename)
-
 
 
 if __name__ == "__main__":
