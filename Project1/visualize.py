@@ -15,7 +15,7 @@ def read_result_and_plot(filename):
 
     plt.figure()
     # plt.plot(x,u, label=r"$u(x)$")
-    plt.plot(x,v, label=r"$n={}$".format(len(x)-2))
+    plt.plot(x,v, label=r"$n={:.1e}$".format(len(x)-2))
     plt.xlabel(r"$x$"); plt.ylabel(r"$v(x)$")
     plt.legend()
     plt.savefig("./figs/v_x.png")
