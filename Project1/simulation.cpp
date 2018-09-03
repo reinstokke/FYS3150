@@ -3,14 +3,18 @@
 #include <fstream>
 #include <iomanip>
 #include "time.h"
+#include <armadillo>
 
 using namespace std;
+using namespace arma;
+
 double f(double);
 double u_analytic(double);
 void generalized_tridiagonal_solver(int n);
 void write_to_file(string filenam, double* x, double* u, double* v, int n);
-double identical_diagonals_solver(int n, bool);
+double identical_diagonals_solver(int n, bool write);
 double find_max(double* lst, int n);
+void general_matrix_solver(int n);
 
 
 int main(int argc, char* argv[]) {
@@ -21,9 +25,12 @@ int main(int argc, char* argv[]) {
         double tmp = atof(argv[1]); // This makes sure we can read the number in scientific notation.
         n = (int) tmp; // Needs to be int though.
         generalized_tridiagonal_solver(n);
-        identical_diagonals_solver(n, true); // Set 'true' for writing results to file.
+        bool write = true; // writes solution to file
+        identical_diagonals_solver(n, write); // Set 'true' for writing results to file.
+        general_matrix_solver(n); // out of memory at n = 1e5..
     } else {
-        // Solves for different values of n and write errors to file
+        // Solves for different values of n and write errors to file.
+        // I only use the fastest solver for this
         ofstream outfile;
         outfile.open("errors.txt");
 
@@ -31,7 +38,9 @@ int main(int argc, char* argv[]) {
         double log_h, log_eps;
         for (int n : n_lst) {
             log_h = log10(1. / (n + 1.));
-            log_eps = identical_diagonals_solver(n, false);
+
+            bool write = false; // don't write solution to file
+            log_eps = identical_diagonals_solver(n, write);
 
             // Write errors to file. Format: "log10(h),log10(eps)\n"
             outfile << setprecision(8) << log_h << "," << log_eps << endl;
@@ -40,10 +49,8 @@ int main(int argc, char* argv[]) {
     }
 
     // This got a bit messy hehe, classes next time :))
-
     return 0;
 }
-
 
 double f(double x) {
     return 100. * exp(-10.*x);
@@ -93,7 +100,7 @@ void generalized_tridiagonal_solver(int n) {
     }
     finish = clock();
     double time_used = (double)(finish - start)/CLOCKS_PER_SEC * 1000.; // [ms]
-    cout << time_used << " ms" << endl;
+    cout << "General tri. dig.: " << time_used << " ms" << endl;
 
     write_to_file("simulation1.txt", x, u, v, n);
 
@@ -107,6 +114,8 @@ void generalized_tridiagonal_solver(int n) {
 }
 
 double identical_diagonals_solver(int n, bool write) {
+    // This method also calculates the error
+
     double h = 1. / (n + 1);    // Step length
     double a = -1;
     // double b = 2;
@@ -146,7 +155,7 @@ double identical_diagonals_solver(int n, bool write) {
 
     finish = clock();
     double time_used = (double)(finish - start)/CLOCKS_PER_SEC * 1000.; // [ms]
-    cout << time_used << " ms" << endl;
+    cout << "Identical diagonals: " << time_used << " ms" << endl;
 
     if (write) {
         write_to_file("simulation2.txt", x, u, v, n);
@@ -165,6 +174,32 @@ double identical_diagonals_solver(int n, bool write) {
     delete[] b_tilde;
 
     return max;
+}
+
+void general_matrix_solver(int n) {
+    vec a = zeros<vec>(n-1); a.fill(-1);
+    vec b = zeros<vec>(n); b.fill(2);
+    vec c = zeros<vec>(n-1); c.fill(-1);
+    mat A = diagmat(a,-1) + diagmat(b) + diagmat(c,1);
+
+    vec b_tilde = zeros<vec>(n);
+    vec x = zeros<vec>(n);
+    double h = 1. / (n + 1);
+    for (int i = 0; i < n; i++) {
+        x(i) = (i + 1) * h;
+        b_tilde(i) = pow(h,2.) * f(x(i));
+    }
+    // Solver
+    clock_t start, finish;
+    start = clock();
+    vec v = solve(A, b_tilde);
+    finish = clock();
+
+    double time_used = (double)(finish - start) / CLOCKS_PER_SEC * 1000.; // ms
+    cout << "LU: " << time_used << " ms.\n";
+
+    v.save("v.txt", raw_ascii);
+    x.save("x.txt", raw_ascii);
 }
 
 void write_to_file(string filename, double* x, double* u, double* v, int n) {

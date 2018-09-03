@@ -21,6 +21,23 @@ def read_result_and_plot(filename):
     plt.savefig("./figs/v_x.png")
     plt.show()
 
+def read_alternative_file_format():
+    # Used for reading the armadillo vectors..
+    x = []
+    v = []
+    file1 = open("x.txt")
+    file2 = open("v.txt")
+
+    for line in file1:
+        x.append(float(line))
+    for line in file2:
+        v.append(float(line))
+
+    plt.plot(x,v)
+    plt.show()
+
+    file1.close()
+    file2.close()
 
 def read_error_and_plot(filename):
     log_h = []; log_eps = []
@@ -35,7 +52,6 @@ def read_error_and_plot(filename):
     plt.scatter(log_h,log_eps)
     plt.xlabel(r"$\log_{10} (h)$")
     plt.ylabel(r"$\epsilon $")
-    plt.legend()
     plt.grid()
     plt.savefig("./figs/eps_h.png")
 
