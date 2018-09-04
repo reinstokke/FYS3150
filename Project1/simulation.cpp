@@ -93,7 +93,7 @@ void generalized_tridiagonal_solver(int n) {
     start = clock();
     for (int i = 2; i <= n; i++) {
         b[i] -= c[i-1] * (a[i-1]/b[i-1]);               // 3*(n-1) flops
-        b_tilde[i] -= b_tilde[i-1] * (a[i-1]/b[i-1]);     // 3*(n-1) flops
+        b_tilde[i] -= b_tilde[i-1] * (a[i-1]/b[i-1]);   // 3*(n-1) flops
     }
     v[n] = b_tilde[n] / b[n];                           // 1 flop
     for (int i = (n-1); i >= 1; i--) {
