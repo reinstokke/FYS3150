@@ -18,6 +18,7 @@ void general_matrix_solver(int n);
 
 
 int main(int argc, char* argv[]) {
+    // Compile as 'c++ simulation.cpp -larmadillo'
 
     if (argc > 1) {
         // User-defined n, and write results to file.
@@ -26,20 +27,20 @@ int main(int argc, char* argv[]) {
         n = (int) tmp; // Needs to be int though.
         generalized_tridiagonal_solver(n);
         bool write = true; // writes solution to file
-        identical_diagonals_solver(n, write); // Set 'true' for writing results to file.
-        general_matrix_solver(n); // out of memory at n = 1e5..
+        identical_diagonals_solver(n, write);
+        general_matrix_solver(n); // Out of memory at n = 1e5..
     } else {
         // Solves for different values of n and write errors to file.
         // I only use the fastest solver for this
         ofstream outfile;
         outfile.open("errors.txt");
-
         int n_lst[] = {10,100,1000,10000,100000,1000000,10000000};
         double log_h, log_eps;
+
         for (int n : n_lst) {
             log_h = log10(1. / (n + 1.));
 
-            bool write = false; // don't write solution to file
+            bool write = false; // Not going to write solution to file
             log_eps = identical_diagonals_solver(n, write);
 
             // Write errors to file. Format: "log10(h),log10(eps)\n"
@@ -151,8 +152,6 @@ double identical_diagonals_solver(int n, bool write) {
     for (int i = (n-1); i >= 1; i--) {
         v[i] = (b_tilde[i] - c*v[i+1]) / b[i];
     }
-
-
     finish = clock();
     double time_used = (double)(finish - start)/CLOCKS_PER_SEC * 1000.; // [ms]
     cout << "Identical diagonals: " << time_used << " ms" << endl;
