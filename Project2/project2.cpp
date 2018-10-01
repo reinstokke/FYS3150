@@ -15,14 +15,17 @@ void harmonicOscillator(int n);
 void twoElectrons(int n);
 
 int main() {
+    // Compile as 'c++ project.cpp -larmadillo'
 
+    cout << "6 lowest eigenvalues of buckling beam problem:\n";
     int N = 200;   // Jacobi takes ages for N > 250
-    // compareArmaToAnalytical(N);
+    compareArmaToAnalytical(N);
+    bucklingBeam(N);
 
-    // bucklingBeam(N);
+    cout << "\nHarmonic oscillator: \n";
+    harmonicOscillator(N);
 
-    // harmonicOscillator(N);
-
+    cout << "\nTwo electrons, with interaction (unstable as a function of rho..): \n";
     twoElectrons(N);
 
     return 0;
@@ -45,10 +48,9 @@ void compareArmaToAnalytical(int N) {
     vec lambdaArma; mat eigVecs;
 
     eig_sym(lambdaArma, eigVecs, A);    // Eigenvectors as columns in 'eigVecs'
-    // cout << analyticalLambda << endl;
-    cout << "\nArmadillo:\n";
+    cout << "\nArmadillo solver - Analytical:\n";
     for (int i = 0; i < 6; i++) {
-        cout << lambdaArma(i) << endl;
+        cout << lambdaArma(i) << "           " << analyticalLambda(i) << endl;
     }
     // cout << eigVecs << endl;
 }
@@ -65,11 +67,11 @@ void bucklingBeam(int n) {
 
     double tol = 1.e-10;
     int iteration = 0;
-    int maxiter = pow(n,3);     // Inaccurate solution for n >
+    int maxiter = pow(n,3);
     int p, q;
     double maxnondiag = offdiag(A, &p, &q, n);
 
-    cout << "\nJacobi:\n";
+    cout << "\nJacobi (N = " << n << "):\n";
 
     // Heavily influenced by the lecture notes
     while (maxnondiag > tol && iteration <= maxiter) {
@@ -93,7 +95,7 @@ void bucklingBeam(int n) {
 }
 
 void harmonicOscillator(int n) {
-    double rho_max = 8.; // Decided so that the result is stable
+    double rho_max = 8.;
     rho_max = 4.;
     double h = rho_max / n;
     double d = 2. / pow(h,2);
@@ -107,7 +109,7 @@ void harmonicOscillator(int n) {
     mat A = diagmat(aVec,-1) + diagmat(dVec) + diagmat(aVec,1);
     mat R = eye<mat>(n,n);
 
-    // // Arma solver - allow much higher n values
+    // // Arma solver - allow for much higher n values
     // vec lambdaArma; mat eigVecs;
     // eig_sym(lambdaArma, eigVecs, A);
     // cout << "Eigenvalues:\n";
@@ -146,7 +148,7 @@ void twoElectrons(int n) {
     for (int i = 0; i < n; i++) {
         dVec(i) = d + pow(omega_r[0]*i*h,2) + pow(h*i,-1);
     }
-    dVec(0) = 1e+10; // 1 / r, as r goes to zero
+    dVec(0) = 1e+15; // 1 / r, as r goes to zero
 
     mat A = diagmat(aVec,-1) + diagmat(dVec) + diagmat(aVec,1);
     mat R = eye<mat>(n,n);
@@ -178,7 +180,7 @@ void twoElectrons(int n) {
 }
 
 
-// Assumes A is symmetric!
+// Assumes A is symmetric
 void Jacobi_rotate(mat& A, mat& R, int k, int l, int n) {
     // COPY PASTE FROM FYS3150 GITHUB - did not have time to implement this myself. Don't give me any points here hehe
     // http://compphysics.github.io/ComputationalPhysics/doc/pub/eigvalues/html/eigvalues.html
